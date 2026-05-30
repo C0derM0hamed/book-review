@@ -20,6 +20,7 @@ class BookController extends Controller
         )
         ->get();
          //compact('books')
+         
         return view('books.index', ['books'=>$books]);
     }
 
