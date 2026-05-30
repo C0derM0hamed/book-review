@@ -12,14 +12,23 @@ class BookController extends Controller
      */
     public function index(Request $request)
     {
-        $title = $request->input('title');
+        $title =(string)$request->input('title');
+        $filter = $request->input('filter');
 
         $books = Book::when(
-        $title,
-        fn($query)=>$query->title($title)
-        )
-        ->get();
+            $title !== '',
+            fn($query) => $query->title($title)
+        );
          //compact('books')
+
+            $books = match ($filter) {
+                'popular_last_month' => $books->popular(now()->subMonth(), now()),
+                'popular_last_6_months' => $books->popular(now()->subMonths(6), now()),
+                'highest_rated_last_month' => $books->highestRated(now()->subMonth(), now()),
+                'highest_rated_last_6_months' => $books->highestRated(now()->subMonths(6), now()),
+                default => $books->latest(),
+            };
+         $books = $books->get();
          
         return view('books.index', ['books'=>$books]);
     }
@@ -43,7 +52,7 @@ class BookController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Book $book)
     {
         //
     }
